@@ -9,28 +9,14 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
-    nixops4 = {
-      url = "github:nixops4/nixops4";
-    };
+
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    nix-wire.url = "github:semi710/nix-wire";
   };
 
-  outputs = { self, nixpkgs, home-manager, nixops4, ... }@inputs: {
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = { inherit inputs; };
-      modules = [
-        ./configuration.nix
-	home-manager.nixosModules.home-manager
-	{
-	  home-manager = {
-	    useGlobalPkgs = true;
-	    useUserPackages = true;
-	    extraSpecialArgs = { inherit inputs; };
-	    users.vallii = ./home.nix;
-	  };
-	}
-      ];
+  outputs =
+    inputs:
+    inputs.nix-wire.mkFlake {
+      inherit inputs;
     };
-  };
 }

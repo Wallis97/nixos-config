@@ -1,15 +1,18 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
-{ config, lib, pkgs, inputs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-#      inputs.nixops4.modules.flake.default 
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
+
+  nixpkgs.hostPlatform = "x86_64-linux";
+  system.stateVersion = "26.11";
 
   # Allow proprietary packages
   nixpkgs.config.allowUnfree = true;
@@ -23,19 +26,26 @@
       devices = [ "nodev" ];
       efiSupport = true;
       useOSProber = true;
-      };
     };
+  };
   time.hardwareClockInLocalTime = true;
-  
+
   # Kernel parameters
   boot.extraModprobeConfig = ''
     options hid_apple fnmode=2
-    '';
+  '';
 
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
+
+  networking.extraHosts = ''
+    192.168.100.86 nixos-homelab
+  '';
 
   # Enable flakes
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # Set your time zone.
   time.timeZone = "Europe/Warsaw";
@@ -62,8 +72,6 @@
   programs.firefox.enable = true;
   environment.sessionVariables.MOZ_ENABLE_WAYLAND = "0";
 
-  programs.hyprland.enable = true;
-
   # Set polish keyboard layout
   services.xserver.xkb.layout = "pl";
 
@@ -75,23 +83,14 @@
     neovim
     git
     gh
-    waybar
-    hyprpaper
     pavucontrol
     freshfetch
     kitty
-    rose-pine-hyprcursor
-    vscode
-    pywal16
-    pywalfox-native
     spotify
-    hyprshot
-    hyprnotify
     cava
     peaclock
     eww
     rpi-imager
-    wofi
     mako
     nmap
     kubectl
@@ -102,7 +101,9 @@
     oh-my-posh
     (discord.override {
       withVencord = true;
-      })
+    })
+    nil
+    nixd
   ];
 
   services = {
@@ -111,7 +112,7 @@
     gnome = {
       core-apps.enable = false;
       games.enable = false;
-#      core-developer-tools.enable = false;
+      #      core-developer-tools.enable = false;
     };
   };
 
@@ -122,7 +123,7 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    };
+  };
 
   # bluetooth configuration
   hardware.bluetooth = {
@@ -131,9 +132,9 @@
     settings = {
       General = {
         Experimental = true;
-	};
       };
     };
+  };
   services.blueman.enable = true;
   services.pipewire.wireplumber.enable = true;
 
@@ -143,32 +144,27 @@
     nvidia = {
       open = false;
       package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
-      };
     };
+  };
 
   services.xserver = {
-    videoDrivers = ["nvidia"];
-   # enable = true;
-    };
+    videoDrivers = [ "nvidia" ];
+    # enable = true;
+  };
 
   # Enable Tailscale
   services.tailscale.enable = true;
   services.resolved.enable = true;
 
-  # Automatic upgrades 
+  # Automatic upgrades
   system.autoUpgrade = {
     enable = true;
     allowReboot = true;
-    };
+  };
 
   # Virt-manager configuration
   virtualisation.libvirtd.enable = true;
   programs.virt-manager.enable = true;
-  users.groups.libvirtd.members = ["vallii"];
+  users.groups.libvirtd.members = [ "vallii" ];
   virtualisation.spiceUSBRedirection.enable = true;
-
-
-  system.stateVersion = "25.05"; # Did you read the comment?
-
 }
-
