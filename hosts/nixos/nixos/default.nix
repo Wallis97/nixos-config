@@ -1,7 +1,9 @@
 {
+  inputs,
   config,
   lib,
   pkgs,
+  flake,
   ...
 }:
 
@@ -9,6 +11,8 @@
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
+    # flake.nixosModules.niri
+    flake.nixosModules.hdd-mount
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
@@ -62,6 +66,7 @@
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
     packages = with pkgs; [
       tree
+      inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
   };
 
@@ -91,7 +96,6 @@
     peaclock
     eww
     rpi-imager
-    mako
     nmap
     kubectl
     kubernetes-helm
@@ -104,16 +108,27 @@
     })
     nil
     nixd
+    (catppuccin-sddm.override {
+        flavor = "mocha";
+        accent = "mauve";
+      })
   ];
 
   services = {
-    displayManager.gdm.enable = true;
+    # displayManager.gdm.enable = true;
     desktopManager.gnome.enable = true;
     gnome = {
       core-apps.enable = false;
       games.enable = false;
       #      core-developer-tools.enable = false;
     };
+  };
+
+  services.displayManager.sddm = {
+    enable = true;
+    wayland.enable = true;
+    theme = "catppuccin-mocha-mauve";
+    package = pkgs.kdePackages.sddm;
   };
 
   # PulseWire configuration
@@ -161,6 +176,9 @@
     enable = true;
     allowReboot = true;
   };
+
+  programs.niri.enable = true;
+  programs.dms-shell.enable = true;
 
   # Virt-manager configuration
   virtualisation.libvirtd.enable = true;
